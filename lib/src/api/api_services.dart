@@ -19,7 +19,7 @@ class ApiServices implements BaseService {
             'Accept': 'application/json',
           });
 
-      log("auth_check -> ${response.body}");
+      log("location_list -> ${response.body}");
 
       return response;
     } catch (e) {
