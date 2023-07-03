@@ -7,7 +7,7 @@ import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-const throttleDuration = Duration(milliseconds: 500);
+const throttleDuration = Duration(milliseconds: 10);
 
 EventTransformer<E> throttleDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -20,7 +20,7 @@ class LocationAddressBloc
   LocationAddressBloc() : super(InitialAddress()) {
     on<SendLocationAddress>(
       _onSearchLocationAddress,
-      transformer: throttleDroppable(throttleDuration),
+      //transformer: throttleDroppable(throttleDuration),
     );
   }
 

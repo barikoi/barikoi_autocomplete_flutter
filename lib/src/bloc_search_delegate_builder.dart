@@ -59,5 +59,12 @@ class BlocSearchDelegateBuilder<B extends StateStreamable<S>, S>
   }
 
   @override
-  Widget? buildLeading(BuildContext context) => null;
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
 }
