@@ -1,7 +1,16 @@
+import 'dart:developer';
+
+import 'package:barikoi_autocomplete/src/bloc/location_address_event.dart';
+import 'package:barikoi_autocomplete/src/bloc/location_address_state.dart';
+import 'package:barikoi_autocomplete/src/model/place.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CustomSearchDelegate extends SearchDelegate {
+class CustomSearchDelegate extends SearchDelegate<Place> {
+  CustomSearchDelegate({required this.locationAddressBloc , required this.key});
 
+  final Bloc<LocationAddressEvent, LocationAddressState> locationAddressBloc;
+  final String key;
 
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -16,84 +25,59 @@ class CustomSearchDelegate extends SearchDelegate {
   }
 
   @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
+  Widget? buildLeading(BuildContext context) => null;
+
+  @override
+  Widget buildResults(BuildContext context) {
+    locationAddressBloc.add(
+        SendLocationAddress(key: key, searchQuery: query));
+    // if (query.length < 3) {
+    //   return const Column(
+    //     mainAxisAlignment: MainAxisAlignment.center,
+    //     children: <Widget>[
+    //       Center(
+    //         child: Text(
+    //           "Search term must be longer than two letters.",
+    //         ),
+    //       )
+    //     ],
+    //   );
+    // }
+
+    return BlocBuilder(
+      bloc: locationAddressBloc,
+      builder: (BuildContext context, LocationAddressState state) {
+        if (state is AddressRequestSending) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is AddressRequestError) {
+          return Text(state.error ?? "");
+        }
+
+        if (state is AddressNotFound) {
+          return Text(state.message ?? "");
+        }
+
+        if (state is GetLocationAddressSuccessfully) {
+          log("on_ui->${state.places.first.address}");
+          return ListView.builder(
+            itemBuilder: (context, index) {
+              return ListTile(
+                leading: const Icon(Icons.location_city),
+                title: Text(state.places[index].address ?? "a"),
+                onTap: () => close(context, state.places[index]),
+              );
+            },
+            itemCount: state.places.length,
+          );
+        }
+        return const Text("Not address found");
       },
     );
   }
 
   @override
-  Widget buildResults(BuildContext context) {
-    if (query.length < 3) {
-      return const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Center(
-            child: Text(
-              "Search term must be longer than two letters.",
-            ),
-          )
-        ],
-      );
-    }
-
-    return Container();
-
-    //Add the search term to the searchBloc.
-    //The Bloc will then handle the searching and add the results to the searchResults stream.
-    //This is the equivalent of submitting the search term to whatever search service you are using
-    // InheritedBlocs.of(context)
-    //     .searchBloc
-    //     .searchTerm
-    //     .add(query);
-    //
-    // return Column(
-    //   children: <Widget>[
-    //     //Build the results based on the searchResults stream in the searchBloc
-    //     StreamBuilder(
-    //       stream: InheritedBlocs.of(context).searchBloc.searchResults,
-    //       builder: (context, AsyncSnapshot<List<Result>> snapshot) {
-    //         if (!snapshot.hasData) {
-    //           return Column(
-    //             crossAxisAlignment: CrossAxisAlignment.center,
-    //             mainAxisAlignment: MainAxisAlignment.center,
-    //             children: <Widget>[
-    //               Center(child: CircularProgressIndicator()),
-    //             ],
-    //           );
-    //         } else if (snapshot.data.length == 0) {
-    //           return Column(
-    //             children: <Widget>[
-    //               Text(
-    //                 "No Results Found.",
-    //               ),
-    //             ],
-    //           );
-    //         } else {
-    //           var results = snapshot.data;
-    //           return ListView.builder(
-    //             itemCount: results.length,
-    //             itemBuilder: (context, index) {
-    //               var result = results[index];
-    //               return ListTile(
-    //                 title: Text(result.title),
-    //               );
-    //             },
-    //           );
-    //         }
-    //       },
-    //     ),
-    //   ],
-    // );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    // This method is called everytime the search term changes.
-    // If you want to add search suggestions as the user enters their search term, this is the place to do that.
-    return Column();
-  }
+  Widget buildSuggestions(BuildContext context) => Container();
 }

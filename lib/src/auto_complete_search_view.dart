@@ -1,7 +1,7 @@
 import 'package:barikoi_autocomplete/src/bloc/location_address_bloc.dart';
-import 'package:barikoi_autocomplete/src/bloc/location_address_event.dart';
 import 'package:barikoi_autocomplete/src/bloc/location_address_state.dart';
 import 'package:barikoi_autocomplete/src/custom_search_delegate.dart';
+import 'package:barikoi_autocomplete/src/model/place.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -33,17 +33,13 @@ class _AutoCompleteSearchViewState extends State<AutoCompleteSearchView> {
                 child: TextField(
                     maxLines: 1,
                     readOnly: true,
-                    onTap: (){
-                      showSearch(
+                    onTap: () async {
+                      var key = widget.apiKey;
+                      Place? selectedPlace = await showSearch<Place>(
                         context: context,
-                        delegate: CustomSearchDelegate(),
+                        delegate: CustomSearchDelegate(locationAddressBloc: BlocProvider.of<LocationAddressBloc>(context), key: key),
                       );
                     },
-                    // onChanged: (query){
-                    //   context
-                    //       .read<LocationAddressBloc>()
-                    //       .add(SendLocationAddress(key: widget.apiKey, searchQuery: query));
-                    // },
                     decoration: InputDecoration(
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
