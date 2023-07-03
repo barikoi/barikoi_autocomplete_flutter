@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:barikoi_autocomplete/src/bloc/location_address_event.dart';
 import 'package:barikoi_autocomplete/src/bloc/location_address_state.dart';
 import 'package:barikoi_autocomplete/src/model/place.dart';
@@ -7,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CustomSearchDelegate extends SearchDelegate<Place> {
-  CustomSearchDelegate({required this.locationAddressBloc , required this.key});
+  CustomSearchDelegate({required this.locationAddressBloc, required this.key});
 
   final Bloc<LocationAddressEvent, LocationAddressState> locationAddressBloc;
   final String key;
@@ -29,8 +27,7 @@ class CustomSearchDelegate extends SearchDelegate<Place> {
 
   @override
   Widget buildResults(BuildContext context) {
-    locationAddressBloc.add(
-        SendLocationAddress(key: key, searchQuery: query));
+    locationAddressBloc.add(SendLocationAddress(key: key, searchQuery: query));
     // if (query.length < 3) {
     //   return const Column(
     //     mainAxisAlignment: MainAxisAlignment.center,
@@ -53,15 +50,18 @@ class CustomSearchDelegate extends SearchDelegate<Place> {
           );
         }
         if (state is AddressRequestError) {
-          return Text(state.error ?? "");
+          return Center(child: Text(state.error ?? ""));
         }
 
         if (state is AddressNotFound) {
-          return Text(state.message ?? "");
+          return Center(child: Text(state.message ?? ""));
+        }
+
+        if (state is EmptyAddressRequest) {
+          return Center(child: Text(state.message ?? ""));
         }
 
         if (state is GetLocationAddressSuccessfully) {
-          log("on_ui->${state.places.first.address}");
           return ListView.builder(
             itemBuilder: (context, index) {
               return ListTile(

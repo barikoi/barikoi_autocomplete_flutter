@@ -30,6 +30,14 @@ class AddressNotFound extends LocationAddressState {
   List<Object> get props => [message];
 }
 
+class EmptyAddressRequest extends LocationAddressState {
+  EmptyAddressRequest({this.message});
+  final dynamic message;
+
+  @override
+  List<Object> get props => [message];
+}
+
 class AddressRequestError extends LocationAddressState {
   AddressRequestError({this.error});
   final dynamic error;

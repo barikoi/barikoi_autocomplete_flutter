@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:barikoi_autocomplete/src/bloc/location_address_event.dart';
 import 'package:barikoi_autocomplete/src/bloc/location_address_state.dart';
@@ -20,32 +19,25 @@ class LocationAddressBloc
       final Repository repository = Repository();
       final responseValue = await repository.sendSearchAddressRequest(
           query: event.searchQuery, key: event.key);
-      log("search_statue -> ${responseValue.statusCode}");
-      if (responseValue.statusCode == 200) {
-        try {
-          var searchResult = responseValue.body;
-          log("search_result -> $searchResult");
-          final Places response = placesFromJson(searchResult);
-          if (response.places != null && response.message == null) {
-            emit(GetLocationAddressSuccessfully(places: response.places!));
-          }
-          if (response.places == null && response.message != null) {
-            log("empty_place");
-            emit(AddressNotFound(message: response.message));
-          }
-        } catch (e) {
-          emit(AddressRequestError(error: "Something is wrong1"));
+
+      try {
+        var searchResult = responseValue.body;
+        final Places response = placesFromJson(searchResult);
+        if ( response.status == 200 && response.places != null && response.message == null) {
+          emit(GetLocationAddressSuccessfully(places: response.places!));
         }
-      } else {
-        log("empty_request");
-        try {
-          final Places response =
-              placesFromJson(responseValue.body);
-          emit(AddressRequestError(error: response.message));
-        } catch (e) {
-          emit(AddressRequestError(error: "Something is wrong2"));
+        if (response.status == 200 && response.message != null) {
+          emit(AddressNotFound(message: response.message));
         }
+
+        if (response.status == 401 && response.message != null) {
+          emit(EmptyAddressRequest(message: response.message));
+        }
+      } catch (e) {
+        emit(AddressRequestError(error: e.toString()));
       }
+
+
     } on SocketException {
       emit(AddressRequestError(
         error: 'No Internet',
