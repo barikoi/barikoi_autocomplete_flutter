@@ -4,12 +4,24 @@ import 'package:barikoi_autocomplete/src/bloc/location_address_state.dart';
 import 'package:barikoi_autocomplete/src/model/places.dart';
 import 'package:barikoi_autocomplete/src/repository/repository.dart';
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:stream_transform/stream_transform.dart';
 
+const throttleDuration = Duration(milliseconds: 500);
+
+EventTransformer<E> throttleDroppable<E>(Duration duration) {
+  return (events, mapper) {
+    return droppable<E>().call(events.throttle(duration), mapper);
+  };
+}
 
 class LocationAddressBloc
     extends Bloc<LocationAddressEvent, LocationAddressState> {
   LocationAddressBloc() : super(InitialAddress()) {
-    on<SendLocationAddress>(_onSearchLocationAddress);
+    on<SendLocationAddress>(
+      _onSearchLocationAddress,
+      transformer: throttleDroppable(throttleDuration),
+    );
   }
 
   void _onSearchLocationAddress(
@@ -23,7 +35,9 @@ class LocationAddressBloc
       try {
         var searchResult = responseValue.body;
         final Places response = placesFromJson(searchResult);
-        if ( response.status == 200 && response.places != null && response.message == null) {
+        if (response.status == 200 &&
+            response.places != null &&
+            response.message == null) {
           emit(GetLocationAddressSuccessfully(places: response.places!));
         }
         if (response.status == 200 && response.message != null) {
@@ -36,8 +50,6 @@ class LocationAddressBloc
       } catch (e) {
         emit(AddressRequestError(error: e.toString()));
       }
-
-
     } on SocketException {
       emit(AddressRequestError(
         error: 'No Internet',

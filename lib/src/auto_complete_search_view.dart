@@ -1,11 +1,11 @@
-import 'dart:developer';
 
 import 'package:barikoi_autocomplete/src/bloc/location_address_bloc.dart';
+import 'package:barikoi_autocomplete/src/bloc/location_address_event.dart';
 import 'package:barikoi_autocomplete/src/bloc/location_address_state.dart';
-import 'package:barikoi_autocomplete/src/custom_search_delegate.dart';
-import 'package:barikoi_autocomplete/src/model/place.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'bloc_search_delegate_builder.dart';
 
 class AutoCompleteSearchView extends StatefulWidget {
   const AutoCompleteSearchView({super.key, required this.apiKey});
@@ -17,7 +17,7 @@ class AutoCompleteSearchView extends StatefulWidget {
 }
 
 class _AutoCompleteSearchViewState extends State<AutoCompleteSearchView> {
-  Place? selectedPlace;
+  String? selectedPlace;
 
   @override
   Widget build(BuildContext context) {
@@ -31,16 +31,50 @@ class _AutoCompleteSearchViewState extends State<AutoCompleteSearchView> {
             child: GestureDetector(
               onTap: () async {
                 var key = widget.apiKey;
-                Place? selected = await showSearch<Place>(
+                await showSearch(
                   context: context,
-                  delegate: CustomSearchDelegate(
-                      locationAddressBloc:
-                          BlocProvider.of<LocationAddressBloc>(context),
-                      key: key),
+                  delegate: BlocSearchDelegateBuilder(
+                    builder: (context, LocationAddressState state){
+                      if (state is AddressRequestSending) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (state is AddressRequestError) {
+                        return Center(child: Text(state.error ?? ""));
+                      }
+
+                      if (state is AddressNotFound) {
+                        return Center(child: Text(state.message ?? ""));
+                      }
+
+                      if (state is EmptyAddressRequest) {
+                        return Center(child: Text(state.message ?? ""));
+                      }
+
+                      if (state is GetLocationAddressSuccessfully) {
+                        return ListView.builder(
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              leading: const Icon(Icons.location_city),
+                              title: Text(state.places[index].address ?? "a"),
+                              onTap: (){
+                                setState(() {
+                                  selectedPlace = state.places[index].address;
+                                  Navigator.pop(context);
+                                });
+                              },
+                            );
+                          },
+                          itemCount: state.places.length,
+                        );
+                      }
+                      return const Text("Not address found");
+                    },
+                    bloc: BlocProvider.of<LocationAddressBloc>(context),
+                    onQuery: (query) => BlocProvider.of<LocationAddressBloc>(context).add(SendLocationAddress(key: key, searchQuery: query)),
+                  ),
                 );
-                setState(() {
-                  selectedPlace = selected;
-                });
               },
               child: Card(
                 elevation: 3,
@@ -73,7 +107,7 @@ class _AutoCompleteSearchViewState extends State<AutoCompleteSearchView> {
                             // color: Colors.blueAccent,
                             alignment: Alignment.centerLeft,
                             padding: const EdgeInsets.only(left: 6, right: 6),
-                            child: Text(selectedPlace?.address ?? ""),
+                            child: Text(selectedPlace ?? ""),
                           )),
                       Flexible(
                           flex: 1,
