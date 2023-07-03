@@ -35,6 +35,9 @@ class _AutoCompleteSearchViewState extends State<AutoCompleteSearchView> {
                   context: context,
                   delegate: BlocSearchDelegateBuilder(
                     builder: (context, LocationAddressState state){
+                      if (state is InitialAddress) {
+                        return const Text("Search your address");
+                      }
                       if (state is AddressRequestSending) {
                         return const Center(
                           child: CircularProgressIndicator(),
@@ -57,7 +60,7 @@ class _AutoCompleteSearchViewState extends State<AutoCompleteSearchView> {
                           itemBuilder: (context, index) {
                             return ListTile(
                               leading: const Icon(Icons.location_city),
-                              title: Text(state.places[index].address ?? "a"),
+                              title: Text(state.places[index].address ?? ""),
                               onTap: (){
                                 setState(() {
                                   selectedPlace = state.places[index].address;
@@ -72,6 +75,9 @@ class _AutoCompleteSearchViewState extends State<AutoCompleteSearchView> {
                       return const Text("Not address found");
                     },
                     bloc: BlocProvider.of<LocationAddressBloc>(context),
+                    buildWhen: (context, state) {
+                      return state is GetLocationAddressSuccessfully;
+                    },
                     onQuery: (query) => BlocProvider.of<LocationAddressBloc>(context).add(SendLocationAddress(key: key, searchQuery: query)),
                   ),
                 );
