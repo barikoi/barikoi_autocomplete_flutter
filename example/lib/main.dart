@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:barikoi_autocomplete/barikoi_autocomplete.dart';
 import 'package:flutter/material.dart';
 
@@ -38,8 +40,12 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         appBar: PreferredSize(
             preferredSize: Size(MediaQuery.of(context).size.width, 80),
-            child: const AutoCompleteSearchView(
+            child: AutoCompleteSearchView(
               apiKey: "",
+              padding: const EdgeInsets.all(8.0),
+              onPlaceSelect: (place){
+                log("selected_place -> ${place.address}");
+              },
             )),
         body: const Center(
           child: Text("Barikoi Auto Complete"),

@@ -74,7 +74,7 @@ class BlocSearchDelegateBuilder<B extends StateStreamable<S>, S>
                 return ListTile(
                   leading: const Icon(Icons.location_city),
                   title: Text(state.places[index].address ?? ""),
-                  onTap: () => close(context, state.places[index].address as S?),
+                  onTap: () => close(context, state.places[index] as S?),
                 );
               },
               itemCount: state.places.length,
@@ -123,7 +123,7 @@ class BlocSearchDelegateBuilder<B extends StateStreamable<S>, S>
               return ListTile(
                 leading: const Icon(Icons.location_city),
                 title: Text(state.places[index].address ?? ""),
-                onTap: () => close(context, state.places[index].address as S?),
+                onTap: () => close(context, state.places[index] as S?),
               );
             },
             itemCount: state.places.length,
