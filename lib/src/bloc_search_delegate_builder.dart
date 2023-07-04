@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'bloc/location_address_state.dart';
+
 
 class BlocSearchDelegateBuilder<B extends StateStreamable<S>, S>
     extends SearchDelegate<S?> {
   BlocSearchDelegateBuilder({
-    required this.builder,
     required this.bloc,
     this.buildWhen,
     this.onQuery,
@@ -16,7 +17,6 @@ class BlocSearchDelegateBuilder<B extends StateStreamable<S>, S>
     super.textInputAction = TextInputAction.search,
   });
 
-  final BlocWidgetBuilder<S> builder;
   final B bloc;
   final BlocBuilderCondition<S>? buildWhen;
   final ValueChanged<String>? onQuery;
@@ -40,7 +40,51 @@ class BlocSearchDelegateBuilder<B extends StateStreamable<S>, S>
       onQuery?.call(query);
     }
     return BlocBuilder<B, S>(
-      builder: builder,
+      builder: (context, state){
+        if (state is InitialAddress) {
+          return const Align(
+            alignment: Alignment.topCenter,
+              child: Text("Search your address"));
+        }
+        if (state is AddressRequestSending) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is AddressRequestError) {
+          return Center(child: Text(state.error ?? ""));
+        }
+
+        if (state is AddressNotFound) {
+          return Align(
+              alignment: Alignment.topCenter,
+              child: Text(state.message ?? ""));
+        }
+
+        if (state is EmptyAddressRequest) {
+          return Align(
+              alignment: Alignment.topCenter,
+              child: Text(state.message ?? ""));
+        }
+
+        if(query.isNotEmpty){
+          if (state is GetLocationAddressSuccessfully) {
+            return ListView.builder(
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: const Icon(Icons.location_city),
+                  title: Text(state.places[index].address ?? ""),
+                  onTap: () => close(context, state.places[index].address as S?),
+                );
+              },
+              itemCount: state.places.length,
+            );
+          }
+        }
+        return const Align(
+            alignment: Alignment.topCenter,
+            child: Text("Search your address"));
+      },
       bloc: bloc,
       buildWhen: buildWhen,
     );
@@ -52,7 +96,41 @@ class BlocSearchDelegateBuilder<B extends StateStreamable<S>, S>
       onQuery?.call(query);
     }
     return BlocBuilder<B, S>(
-      builder: builder,
+      builder: (context, state){
+        if (state is InitialAddress) {
+          return const Text("Search your address");
+        }
+        if (state is AddressRequestSending) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is AddressRequestError) {
+          return Center(child: Text(state.error ?? ""));
+        }
+
+        if (state is AddressNotFound) {
+          return Center(child: Text(state.message ?? ""));
+        }
+
+        if (state is EmptyAddressRequest) {
+          return Center(child: Text(state.message ?? ""));
+        }
+
+        if (state is GetLocationAddressSuccessfully) {
+          return ListView.builder(
+            itemBuilder: (context, index) {
+              return ListTile(
+                leading: const Icon(Icons.location_city),
+                title: Text(state.places[index].address ?? ""),
+                onTap: () => close(context, state.places[index].address as S?),
+              );
+            },
+            itemCount: state.places.length,
+          );
+        }
+        return const Text("Not address found");
+      },
       bloc: bloc,
       buildWhen: buildWhen,
     );

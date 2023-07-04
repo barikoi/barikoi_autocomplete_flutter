@@ -20,7 +20,7 @@ class LocationAddressBloc
   LocationAddressBloc() : super(InitialAddress()) {
     on<SendLocationAddress>(
       _onSearchLocationAddress,
-      //transformer: throttleDroppable(throttleDuration),
+      transformer: throttleDroppable(throttleDuration),
     );
   }
 

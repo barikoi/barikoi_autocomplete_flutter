@@ -1,3 +1,4 @@
+import 'dart:developer';
 
 import 'package:barikoi_autocomplete/src/bloc/location_address_bloc.dart';
 import 'package:barikoi_autocomplete/src/bloc/location_address_event.dart';
@@ -31,56 +32,21 @@ class _AutoCompleteSearchViewState extends State<AutoCompleteSearchView> {
             child: GestureDetector(
               onTap: () async {
                 var key = widget.apiKey;
-                await showSearch(
+                var selected = await showSearch(
                   context: context,
                   delegate: BlocSearchDelegateBuilder(
-                    builder: (context, LocationAddressState state){
-                      if (state is InitialAddress) {
-                        return const Text("Search your address");
-                      }
-                      if (state is AddressRequestSending) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      if (state is AddressRequestError) {
-                        return Center(child: Text(state.error ?? ""));
-                      }
-
-                      if (state is AddressNotFound) {
-                        return Center(child: Text(state.message ?? ""));
-                      }
-
-                      if (state is EmptyAddressRequest) {
-                        return Center(child: Text(state.message ?? ""));
-                      }
-
-                      if (state is GetLocationAddressSuccessfully) {
-                        return ListView.builder(
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              leading: const Icon(Icons.location_city),
-                              title: Text(state.places[index].address ?? ""),
-                              onTap: (){
-                                setState(() {
-                                  selectedPlace = state.places[index].address;
-                                  Navigator.pop(context);
-                                });
-                              },
-                            );
-                          },
-                          itemCount: state.places.length,
-                        );
-                      }
-                      return const Text("Not address found");
-                    },
                     bloc: BlocProvider.of<LocationAddressBloc>(context),
                     buildWhen: (context, state) {
                       return state is GetLocationAddressSuccessfully;
                     },
-                    onQuery: (query) => BlocProvider.of<LocationAddressBloc>(context).add(SendLocationAddress(key: key, searchQuery: query)),
+                    onQuery: (query) =>
+                        BlocProvider.of<LocationAddressBloc>(context).add(
+                            SendLocationAddress(key: key, searchQuery: query)),
                   ),
                 );
+                setState(() {
+                  selectedPlace = selected as String?;
+                });
               },
               child: Card(
                 elevation: 3,
