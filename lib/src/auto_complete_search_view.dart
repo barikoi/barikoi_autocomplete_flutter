@@ -8,19 +8,24 @@ import 'package:flutter_svg/svg.dart';
 import 'bloc_search_delegate_builder.dart';
 
 class AutoCompleteSearchView extends StatefulWidget {
-  const AutoCompleteSearchView(
-      {super.key,
-      required this.apiKey,
-      this.borderRadius = 10,
-      this.elevation = 3,
-      required this.padding,
-      required this.onPlaceSelect,
-      this.backgroundColor = Colors.white,
-      this.shadowColor = Colors.grey,
-        this.prefixIconAsset = "assets/barikoi_logo.svg",
-        this.prefixIconHeight = 24,
-        this.prefixIconWidth = 24,
-        this.prefixIconColor = Colors.grey});
+  const AutoCompleteSearchView({
+    super.key,
+    required this.apiKey,
+    this.borderRadius = 10,
+    this.elevation = 3,
+    required this.padding,
+    required this.onPlaceSelect,
+    this.backgroundColor = Colors.white,
+    this.shadowColor = Colors.grey,
+    this.prefixIconAsset = "assets/barikoi_logo.svg",
+    this.prefixIconHeight = 24,
+    this.prefixIconWidth = 24,
+    this.prefixIconColor = Colors.grey,
+    this.suffixIconAsset = "assets/search_icon.svg",
+    this.suffixIconHeight = 24,
+    this.suffixIconWidth = 24,
+    this.suffixIconColor = Colors.grey,
+  });
 
   final String apiKey;
   final double borderRadius;
@@ -33,6 +38,10 @@ class AutoCompleteSearchView extends StatefulWidget {
   final double prefixIconHeight;
   final double prefixIconWidth;
   final Color prefixIconColor;
+  final String suffixIconAsset;
+  final double suffixIconHeight;
+  final double suffixIconWidth;
+  final Color suffixIconColor;
 
   @override
   State<AutoCompleteSearchView> createState() => _AutoCompleteSearchViewState();
@@ -92,7 +101,8 @@ class _AutoCompleteSearchViewState extends State<AutoCompleteSearchView> {
                         flex: 1,
                         child: SvgPicture.asset(
                           widget.prefixIconAsset,
-                          colorFilter:  ColorFilter.mode(widget.prefixIconColor, BlendMode.srcIn),
+                          colorFilter: ColorFilter.mode(
+                              widget.prefixIconColor, BlendMode.srcIn),
                           width: widget.prefixIconWidth,
                           height: widget.prefixIconWidth,
                         ),
@@ -108,9 +118,12 @@ class _AutoCompleteSearchViewState extends State<AutoCompleteSearchView> {
                       Flexible(
                           flex: 1,
                           child: selectedPlace == null
-                              ? Icon(
-                                  Icons.search,
-                                  color: Colors.grey.shade700,
+                              ? SvgPicture.asset(
+                                  widget.suffixIconAsset,
+                                  colorFilter: ColorFilter.mode(
+                                      widget.suffixIconColor, BlendMode.srcIn),
+                                  width: widget.suffixIconWidth,
+                                  height: widget.suffixIconWidth,
                                 )
                               : IconButton(
                                   onPressed: () {
